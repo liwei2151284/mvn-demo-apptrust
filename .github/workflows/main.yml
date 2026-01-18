@@ -17,6 +17,7 @@ permissions:
 env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
   Build_name: "mvn-apptrust-demo-build"
+  Application_Key: "weil"
   
 jobs:
   security-java-demo:
@@ -74,5 +75,85 @@ jobs:
 
     - name: Create app version
       run: |
-        jf at version-create weil $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
+        jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
   
+
+
+    - name: Extract JIRA IDs from local commit message
+      id: jira
+      shell: bash
+      run: |
+        set -euo pipefail
+        MSG="$(git log -1 --pretty=%B || true)"
+        echo "Commit message:"
+        echo "$MSG"
+
+        # 提取类似 ABC-123 的 Jira Key（可按需调整）
+        JIRA_IDS="$(echo "$MSG" | grep -oE '[A-Z]+-[0-9]+' | sort -u | tr '\n' ' ' | xargs || true)"
+        echo "jira_ids=$JIRA_IDS" >> "$GITHUB_OUTPUT"
+
+        if [ -z "$JIRA_IDS" ]; then
+          echo "No JIRA IDs found. Skip evidence."
+        else
+          echo "Found JIRA IDs: $JIRA_IDS"
+        fi
+
+    - name: Generate default JIRA evidence files
+      if: ${{ steps.jira.outputs.jira_ids != '' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        # 转成 JSON array
+        IDS_JSON=$(printf '%s\n' "${{ steps.jira.outputs.jira_ids }}" | tr ' ' '\n' | awk 'NF' | jq -R . | jq -s .)
+
+        cat > jira-evidence-predicate.json <<EOF
+        {
+          "schemaVersion": "1.0",
+          "type": "jira-ids-local",
+          "build": {
+            "name": "${BUILD_NAME}",
+            "number": "${GITHUB_RUN_NUMBER}"
+          },
+          "jira": {
+            "ids": ${IDS_JSON}
+          },
+          "source": {
+            "repo": "${GITHUB_REPOSITORY}",
+            "ref": "${GITHUB_REF}",
+            "sha": "${GITHUB_SHA}",
+            "run_url": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          },
+          "created_at": "$(date -u +%FT%TZ)"
+        }
+        EOF
+
+        cat > jira-evidence.md <<EOF
+        ## JIRA Evidence (Local Extraction)
+
+        This evidence is generated **without querying Jira**.
+        JIRA IDs are extracted from the latest git commit message.
+
+        - Build: \`${BUILD_NAME} #${GITHUB_RUN_NUMBER}\`
+        - Repo: \`${GITHUB_REPOSITORY}\`
+        - Commit: \`${GITHUB_SHA}\`
+        - Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+
+        **JIRA IDs**
+        - ${{ steps.jira.outputs.jira_ids }}
+        EOF
+
+    - name: Create JIRA evidence (bind to build)
+      if: ${{ steps.jira.outputs.jira_ids != '' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        jf rt ping
+
+        jf evd create \
+          --build-name "${BUILD_NAME}" \
+          --build-number "${GITHUB_RUN_NUMBER}" \
+          --predicate jira-evidence-predicate.json \
+          --predicate-type "http://atlassian.com/jira/issues/v1" \
+          --markdown jira-evidence.md \
+          --provider-id jira
