@@ -51,6 +51,7 @@ jobs:
     - name: Build Maven Project
       run: |
         java -version
+        mvn clean install
         jf rt ping
         jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  --use-wrapper=true
         jf  mvn -B -U clean install --build-name=$Build_name  --build-number=$GITHUB_RUN_NUMBER
