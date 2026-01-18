@@ -143,7 +143,7 @@ jobs:
         This evidence is generated **without querying Jira**.
         JIRA IDs are extracted from the latest git commit message.
 
-        - Build: \`${BUILD_NAME} #${GITHUB_RUN_NUMBER}\`
+        - Build: \`${Build_name} #${GITHUB_RUN_NUMBER}\`
         - Repo: \`${GITHUB_REPOSITORY}\`
         - Commit: \`${GITHUB_SHA}\`
         - Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
