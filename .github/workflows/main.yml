@@ -21,7 +21,7 @@ env:
   Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-  SUBJECT_PATH: ${{ env.JFROG_MVN_REPO }}/com/example/sg/app-boot/1.0.${{ github.run_number }}/app-boot-1.0.${{ github.run_number }}.war
+  SUBJECT_PATH: "weil-mvn-virtual/com/example/sg/app-boot/1.0.${{ github.run_number }}/app-boot-1.0.${{ github.run_number }}.war"
 
 
 jobs:
