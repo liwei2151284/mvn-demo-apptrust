@@ -112,7 +112,7 @@ jobs:
           "schemaVersion": "1.0",
           "type": "jira-ids-local",
           "build": {
-            "name": "${BUILD_NAME}",
+            "name": "${Build_name}",
             "number": "${GITHUB_RUN_NUMBER}"
           },
           "jira": {
@@ -151,7 +151,7 @@ jobs:
         jf rt ping
 
         jf evd create \
-          --build-name "${BUILD_NAME}" \
+          --build-name "${Build_name}" \
           --build-number "${GITHUB_RUN_NUMBER}" \
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
