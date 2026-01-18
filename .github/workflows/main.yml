@@ -108,50 +108,50 @@ jobs:
           echo "Found JIRA IDs: $JIRA_IDS"
         fi
 
-    - name: Generate default JIRA evidence files
+    - name: Generate default JIRA evidence files (tasks[])
       if: ${{ steps.jira.outputs.jira_ids != '' }}
       shell: bash
       run: |
         set -euo pipefail
 
-        # 转成 JSON array
-        IDS_JSON=$(printf '%s\n' "${{ steps.jira.outputs.jira_ids }}" | tr ' ' '\n' | awk 'NF' | jq -R . | jq -s .)
+        # 把 "ABC-1 DEF-2" 变成一行一个
+        IDS_LINES="$(printf '%s\n' "${{ steps.jira.outputs.jira_ids }}" | tr ' ' '\n' | awk 'NF')"
 
-        cat > jira-evidence-predicate.json <<EOF
-        {
-          "schemaVersion": "1.0",
-          "type": "jira-ids-local",
-          "build": {
-            "name": "${Build_name}",
-            "number": "${GITHUB_RUN_NUMBER}"
-          },
-          "jira": {
-            "ids": ${IDS_JSON}
-          },
-          "source": {
-            "repo": "${GITHUB_REPOSITORY}",
-            "ref": "${GITHUB_REF}",
-            "sha": "${GITHUB_SHA}",
-            "run_url": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          },
-          "created_at": "$(date -u +%FT%TZ)"
-        }
-        EOF
+        # 生成 tasks 数组（每个 key 一个默认对象）
+        TASKS_JSON="$(echo "$IDS_LINES" | jq -R '
+          {
+            assignee: null,
+            created: "",
+            description: "",
+            key: .,
+            priority: "",
+            project: "",
+            reporter: "",
+            status: "FoundInCommit",
+            transitions: [],
+            type: "JiraKey",
+            updated: ""
+          }' | jq -s '{tasks: .}')"
 
+        # 写 predicate JSON：就是你要的格式
+        echo "$TASKS_JSON" > jira-evidence-predicate.json
+
+        # 可选：生成 markdown
         cat > jira-evidence.md <<EOF
         ## JIRA Evidence (Local Extraction)
 
         This evidence is generated **without querying Jira**.
         JIRA IDs are extracted from the latest git commit message.
 
-        - Build: \`${Build_name} #${GITHUB_RUN_NUMBER}\`
+        - Build: \`${BUILD_NAME} #${GITHUB_RUN_NUMBER}\`
         - Repo: \`${GITHUB_REPOSITORY}\`
         - Commit: \`${GITHUB_SHA}\`
         - Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
 
         **JIRA IDs**
-        - ${{ steps.jira.outputs.jira_ids }}
+        $(echo "$IDS_LINES" | awk '{print "- " $0}')
         EOF
+
 
     - name: Create JIRA evidence (bind to build)
       if: ${{ steps.jira.outputs.jira_ids != '' }}
