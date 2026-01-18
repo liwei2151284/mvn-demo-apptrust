@@ -21,8 +21,7 @@ env:
   Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-  SUBJECT_PATH: "$JFrog_Mvn_Repo/com/example/sg/app-boot/1.0.$GITHUB_RUN_NUMBER/app-boot-1.0.$GITHUB_RUN_NUMBER.war"
-  
+
 jobs:
   security-java-demo:
     name: Build
@@ -88,7 +87,8 @@ jobs:
 
     - name: Create app version
       run: |
-        # jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
+        SUBJECT_PATH: "$JFrog_Mvn_Repo/com/example/sg/app-boot/1.0.$GITHUB_RUN_NUMBER/app-boot-1.0.$GITHUB_RUN_NUMBER.war"
+        echo "SUBJECT_PATH=$SUBJECT_PATH"
         jf at vc $Application_Key $GITHUB_RUN_NUMBER --source-type-artifacts $SUBJECT_PATH
   
 
@@ -163,7 +163,9 @@ jobs:
       run: |
         set -euo pipefail
         jf rt ping
-
+        SUBJECT_PATH: "$JFrog_Mvn_Repo/com/example/sg/app-boot/1.0.$GITHUB_RUN_NUMBER/app-boot-1.0.$GITHUB_RUN_NUMBER.war"
+        echo "SUBJECT_PATH=$SUBJECT_PATH"
+        
         jf evd create \
           --subject-repo-path="$SUBJECT_PATH" \
           --project $Project_Key \
