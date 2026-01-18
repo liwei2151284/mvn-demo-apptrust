@@ -21,7 +21,7 @@ env:
   Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-  SUBJECT_PATH: "weil-mvn-virtual/com/example/sg/app-boot/1.0.${{ github.run_number }}/app-boot-1.0.${{ github.run_number }}.war"
+  SUBJECT_PATH: "weil-mvn-virtual/com/example/sg/app-boot/1.0.${{ github.run_number }}/app-boot-1.0.${{ github.run_number }}"
 
 
 jobs:
@@ -166,7 +166,16 @@ jobs:
         jf rt ping
 
         jf evd create \
-          --subject-repo-path="$SUBJECT_PATH" \
+          --subject-repo-path="$SUBJECT_PATH.war" \
+          --project $Project_Key \
+          --predicate jira-evidence-predicate.json \
+          --predicate-type "http://atlassian.com/jira/issues/v1" \
+          --markdown jira-evidence.md \
+          --provider-id jira \
+          --key ./jfrog-signing-key.pem
+
+        jf evd create \
+          --subject-repo-path="$SUBJECT_PATH.pom" \
           --project $Project_Key \
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
