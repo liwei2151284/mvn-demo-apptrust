@@ -72,4 +72,7 @@ jobs:
         jf rt bag $Build_name $GITHUB_RUN_NUMBER --project=weil
         jf rt bp $Build_name $GITHUB_RUN_NUMBER --project=weil
 
+    - name: Create app version
+      run: |
+        jf actions version-create weil-demo $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER"
   
