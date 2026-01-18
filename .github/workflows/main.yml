@@ -18,6 +18,7 @@ env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
+  Evidence_Key: "wei_key"
   
 jobs:
   security-java-demo:
@@ -156,4 +157,5 @@ jobs:
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown jira-evidence.md \
-          --provider-id jira 
+          --provider-id jira \
+          --key $Evidence_Key
