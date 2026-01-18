@@ -18,7 +18,8 @@ env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
-  Evidence_Key: "wei_key"
+  JFROG_CLI_KEY_ALIAS: "weili-publickey"
+  JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
   
 jobs:
   security-java-demo:
@@ -45,6 +46,14 @@ jobs:
         which mvn
         mvn -v
 
+    - name: Write PEM from secret
+      run: |
+        umask 077
+        cat > jfrog-signing-key.pem <<'EOF'
+        ${{ secrets.JFROG_CLI_SIGNING_KEY }}
+        EOF
+        head -n 1 jfrog-signing-key.pem
+        tail -n 1 jfrog-signing-key.pem
 
     - name: Setup JFrog CLI
       uses: jfrog/setup-jfrog-cli@v4.9.1
@@ -158,4 +167,4 @@ jobs:
           --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown jira-evidence.md \
           --provider-id jira \
-          --key $Evidence_Key
+          --key ./jfrog-signing-key.pem
