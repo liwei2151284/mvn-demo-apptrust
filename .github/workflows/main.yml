@@ -18,8 +18,10 @@ env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
+  Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
+  SUBJECT_PATH: "$JFrog_Mvn_Repo/com/example/sg/app-boot/1.0.$GITHUB_RUN_NUMBER/app-boot-1.0.$GITHUB_RUN_NUMBER.war"
   
 jobs:
   security-java-demo:
@@ -74,6 +76,7 @@ jobs:
         export PATH="$MAVEN_HOME/bin:$PATH"
         jf -v
         jf rt ping
+        sed -i "/s/Version_Tag/$GITHUB_RUN_NUMBER/g" pom.xml
         jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  
         jf  mvn -B -U clean install --build-name=$Build_name  --build-number=$GITHUB_RUN_NUMBER 
 
@@ -85,7 +88,8 @@ jobs:
 
     - name: Create app version
       run: |
-        jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
+        # jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
+        jf at vc $Application_Key $GITHUB_RUN_NUMBER --source-type-artifacts $SUBJECT_PATH
   
 
 
@@ -161,8 +165,8 @@ jobs:
         jf rt ping
 
         jf evd create \
-          --build-name "${Build_name}" \
-          --build-number "${GITHUB_RUN_NUMBER}" \
+          --subject-repo-path="$SUBJECT_PATH" \
+          --project $Project_Key \
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown jira-evidence.md \
