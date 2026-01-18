@@ -156,4 +156,4 @@ jobs:
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown jira-evidence.md \
-          --provider-id jira
+          --provider-id jira 
