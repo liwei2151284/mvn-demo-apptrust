@@ -34,12 +34,13 @@ jobs:
         java-version: '17'
         cache: maven
 
-    - name: Install Maven 3.8.8
+    - name: Install & Use Maven 3.8.8 (same step)
       run: |
         MAVEN_VERSION=3.8.8
         curl -fsSL https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz -o maven.tgz
         tar -xzf maven.tgz
-        echo "$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        export PATH="$PWD/apache-maven-${MAVEN_VERSION}/bin:$PATH"
+        which mvn
         mvn -v
 
 
@@ -60,7 +61,7 @@ jobs:
       run: |
         jf -v
         jf rt ping
-        jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  --use-wrapper=true
+        jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  
         jf  mvn -B -U clean install --build-name=$Build_name  --build-number=$GITHUB_RUN_NUMBER
 
     - name: Publish Build-Info to JFrog Repo
