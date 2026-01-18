@@ -16,13 +16,12 @@ permissions:
 
 env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
-  JFrog_Mvn_Local_Repo: "weil-mvn-local"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
   Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-  SUBJECT_PATH: "weil-mvn-virtual/com/example/sg/app-boot/1.0.${{ github.run_number }}/app-boot-1.0.${{ github.run_number }}"
+
 
 
 jobs:
@@ -49,7 +48,6 @@ jobs:
         export PATH="$PWD/apache-maven-${MAVEN_VERSION}/bin:$PATH"
         which mvn
         mvn -v
-        echo $SUBJECT_PATH
 
     - name: Write PEM from secret
       run: |
@@ -103,61 +101,53 @@ jobs:
         MSG="$(git log -1 --pretty=%B || true)"
         echo "Commit message:"
         echo "$MSG"
-
         # 提取类似 ABC-123 的 Jira Key（可按需调整）
         JIRA_IDS="$(echo "$MSG" | grep -oE '[A-Z]+-[0-9]+' | sort -u | tr '\n' ' ' | xargs || true)"
         echo "jira_ids=$JIRA_IDS" >> "$GITHUB_OUTPUT"
-
         if [ -z "$JIRA_IDS" ]; then
           echo "No JIRA IDs found. Skip evidence."
         else
           echo "Found JIRA IDs: $JIRA_IDS"
         fi
 
-    - name: Generate default JIRA evidence files (tasks[])
+    - name: Generate default JIRA evidence files
       if: ${{ steps.jira.outputs.jira_ids != '' }}
       shell: bash
       run: |
         set -euo pipefail
-
-        # 把 "ABC-1 DEF-2" 变成一行一个
-        IDS_LINES="$(printf '%s\n' "${{ steps.jira.outputs.jira_ids }}" | tr ' ' '\n' | awk 'NF')"
-
-        # 生成 tasks 数组（每个 key 一个默认对象）
-        TASKS_JSON="$(echo "$IDS_LINES" | jq -R '
-          {
-            assignee: null,
-            created: "",
-            description: "",
-            key: .,
-            priority: "",
-            project: "",
-            reporter: "",
-            status: "FoundInCommit",
-            transitions: [],
-            type: "JiraKey",
-            updated: ""
-          }' | jq -s '{tasks: .}')"
-
-        # 写 predicate JSON：就是你要的格式
-        echo "$TASKS_JSON" > jira-evidence-predicate.json
-
-        # 可选：生成 markdown
+        # 转成 JSON array
+        IDS_JSON=$(printf '%s\n' "${{ steps.jira.outputs.jira_ids }}" | tr ' ' '\n' | awk 'NF' | jq -R . | jq -s .)
+        cat > jira-evidence-predicate.json <<EOF
+        {
+          "schemaVersion": "1.0",
+          "type": "jira-ids-local",
+          "build": {
+            "name": "${Build_name}",
+            "number": "${GITHUB_RUN_NUMBER}"
+          },
+          "jira": {
+            "ids": ${IDS_JSON}
+          },
+          "source": {
+            "repo": "${GITHUB_REPOSITORY}",
+            "ref": "${GITHUB_REF}",
+            "sha": "${GITHUB_SHA}",
+            "run_url": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          },
+          "created_at": "$(date -u +%FT%TZ)"
+        }
+        EOF
         cat > jira-evidence.md <<EOF
         ## JIRA Evidence (Local Extraction)
-
         This evidence is generated **without querying Jira**.
         JIRA IDs are extracted from the latest git commit message.
-
         - Build: \`${Build_name} #${GITHUB_RUN_NUMBER}\`
         - Repo: \`${GITHUB_REPOSITORY}\`
         - Commit: \`${GITHUB_SHA}\`
         - Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
-
         **JIRA IDs**
-        $(echo "$IDS_LINES" | awk '{print "- " $0}')
+        - ${{ steps.jira.outputs.jira_ids }}
         EOF
-
 
     - name: Create JIRA evidence (bind to build)
       if: ${{ steps.jira.outputs.jira_ids != '' }}
@@ -165,12 +155,9 @@ jobs:
       run: |
         set -euo pipefail
         jf rt ping
-
         jf evd create \
-          --package-name "com.example.sg:app-boot" \
-          --package-repo-name $JFrog_Mvn_Local_Repo \
-          --package-version 1.0.$GITHUB_RUN_ID \
-          --project $Project_Key \
+          --build-name "${Build_name}" \
+          --build-number "${GITHUB_RUN_NUMBER}" \
           --predicate jira-evidence-predicate.json \
           --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown jira-evidence.md \
