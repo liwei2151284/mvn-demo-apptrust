@@ -59,6 +59,8 @@ jobs:
 
     - name: Build Maven Project
       run: |
+        export MAVEN_HOME="$GITHUB_WORKSPACE/apache-maven-3.8.8"
+        export PATH="$MAVEN_HOME/bin:$PATH"
         jf -v
         jf rt ping
         jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  
