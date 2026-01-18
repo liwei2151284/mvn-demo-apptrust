@@ -74,5 +74,5 @@ jobs:
 
     - name: Create app version
       run: |
-        jf at version-create weil $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER"
+        jf at version-create weil $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" --project=weil
   
