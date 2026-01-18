@@ -16,6 +16,7 @@ permissions:
 
 env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
+  JFrog_Mvn_Local_Repo: "weil-mvn-local"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
   Project_Key: "weil"
@@ -167,7 +168,7 @@ jobs:
 
         jf evd create \
           --package-name "com.example.sg:app-boot" \
-          --package-repo-name $JFrog_Mvn_Repo \
+          --package-repo-name $JFrog_Mvn_Local_Repo \
           --package-version 1.0.$GITHUB_RUN_ID \
           --project $Project_Key \
           --predicate jira-evidence-predicate.json \
