@@ -34,9 +34,17 @@ jobs:
         java-version: '17'
         cache: maven
 
-    - name: Setup JFrog CLI
-      uses: jfrog/setup-jfrog-cli@2e799e083bd495ddc293014fc416e80435c6486a
+    - name: Install Maven 3.8.8
+      run: |
+        MAVEN_VERSION=3.8.8
+        curl -fsSL https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz -o maven.tgz
+        tar -xzf maven.tgz
+        echo "$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        mvn -v
 
+
+    - name: Setup JFrog CLI
+      uses: jfrog/setup-jfrog-cli@v4
       env:
         # JFrog Platform url
         JF_URL: ${{ secrets.JF_URL }}
