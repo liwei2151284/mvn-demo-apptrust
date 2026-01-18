@@ -33,8 +33,9 @@ jobs:
         distribution: temurin
         java-version: '17'
         cache: maven
-    #- name: Setup JFrog CLI
-    #  uses: jfrog/setup-jfrog-cli@v4
+        
+    - name: Setup JFrog CLI
+      uses: jfrog/setup-jfrog-cli@v4
 
       env:
         # JFrog Platform url
