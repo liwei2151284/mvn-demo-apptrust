@@ -90,7 +90,7 @@ jobs:
 
     - name: Create app version
       run: |
-        jf at vc $Application_Key $GITHUB_RUN_NUMBER --source-type-artifacts $SUBJECT_PATH
+        jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
   
 
 
