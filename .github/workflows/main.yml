@@ -63,7 +63,7 @@ jobs:
     - name: Setup JFrog CLI
       uses: jfrog/setup-jfrog-cli@v4.9.1
       with:
-        oidc-provider-name: ${OIDC_PROVIDER_NAME} # <owner>/<repo>@github
+        oidc-provider-name: liwei2151284/mvn-demo-apptrust@github
       env:
         # JFrog Platform url
         JF_URL: ${{ secrets.JF_URL }}
