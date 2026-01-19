@@ -18,11 +18,14 @@ permissions:
 
 env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
+  JFrog_Docker_Repo: "weil-docker-local"
   Build_name: "mvn-apptrust-demo-build"
   Application_Key: "weil"
   Project_Key: "weil"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
+  DOCKER_REGISTRY_PREFIX: "solenglatest.jfrog.io"
+  APP_NAME: "mvn-apptrust-demo"
 
 
 
@@ -34,6 +37,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -88,12 +94,26 @@ jobs:
         jf  mvnc --repo-resolve-releases=$JFrog_Mvn_Repo --repo-resolve-snapshots=$JFrog_Mvn_Repo --repo-deploy-releases=$JFrog_Mvn_Repo --repo-deploy-snapshots=$JFrog_Mvn_Repo  
         jf  mvn -B -U clean install --build-name=$Build_name  --build-number=$GITHUB_RUN_NUMBER 
 
-    - name: Attest build provenance (jar/war)
+
+    - name: Build Docker Project and Push Docker image
+      run: |
+        jf docker  build  \
+          --tag $DOCKER_REGISTRY_PREFIX/$JFrog_Docker_Repo/$APP_NAME:$GITHUB_RUN_NUMBER  \
+          --metadata-file=build-metadata --output=type=image --push .
+        jf rt build-docker-create $JFrog_Docker_Repo \
+          --project $Project_Key --image-file build-metadata --build-name $Build_nam e--build-number $GITHUB_RUN_NUMBER
+
+        DIGEST=$(jq -r '.["containerimage.digest"]' build-metadata)
+        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+        echo "Extracted digest: $DIGEST"
+
+
+    - name: Attest Docker Image with Build Provenance
       uses: actions/attest-build-provenance@v3
       with:
-        subject-path: |
-          target/*.jar
-          target/*.war
+        # The 'oci://' prefix is required by JFrog to correctly parse the artifact type
+        subject-name: oci://$DOCKER_REGISTRY_PREFIX/$JFrog_Docker_Repo/$APP_NAME:$GITHUB_RUN_NUMBER
+        subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
     - name: Publish Build-Info to JFrog Repo
       run: |
@@ -179,6 +199,16 @@ jobs:
           --key ./jfrog-signing-key.pem
 
 
+
+    - name: Evidence on docker image
+      if: ${{ steps.jira.outputs.jira_ids != '' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "🔍 Creating evidence on docker image..."
+        jf evd create --subject-repo-path $DOCKER_REGISTRY_PREFIX/$JFrog_Docker_Repo/$APP_NAME/$GITHUB_RUN_NUMBER/list.manifest.json  \
+          --project ${{ env.JF_PROJECT }} --predicate ./jira-evidence-predicate.json --predicate-type "http://atlassian.com/jira/issues/v1" \
+          --markdown ./jira-evidence.md --provider-id jira --key ./jfrog-signing-key.pem
 
 
 
