@@ -66,7 +66,11 @@ jobs:
         # JFrog Platform url
         JF_URL: ${{ secrets.JF_URL }}
         # JFrog Platform access token
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        # JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        # JF_URL: ${{ vars.JF_URL }}
+        with:
+          oidc-provider-name: ${OIDC_PROVIDER_NAME} # <owner>/<repo>@github
+
     
         #- name: Configure Supinfo CLI
         #  run: |
@@ -172,3 +176,8 @@ jobs:
           --markdown jira-evidence.md \
           --provider-id jira \
           --key ./jfrog-signing-key.pem
+
+
+
+
+
