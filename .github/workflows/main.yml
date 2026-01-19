@@ -113,7 +113,7 @@ jobs:
       uses: actions/attest-build-provenance@v3
       with:
         # The 'oci://' prefix is required by JFrog to correctly parse the artifact type
-        subject-name: oci://${{ env.DOCKER_REGISTRY_PREFIX }}/${{ env.JFROG_DOCKER_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
+        subject-name: oci://${{ env.DOCKER_REGISTRY_PREFIX }}/${{ env.JFrog_Docker_Repo }}/${{ env.APP_NAME }}:${{ github.run_number }}
         subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
 
