@@ -1,4 +1,4 @@
-FROM demo.jfrogchina.com/slash-docker-virtual/docker-framework:latest
+FROM solenglatest.jfrog.io/weil-docker-demochina-remote/docker-framework:latest
 
 LABEL MAINTAINER="Alex Wang"
 
