@@ -123,12 +123,6 @@ jobs:
         jf rt bag $Build_name $GITHUB_RUN_NUMBER 
         jf rt bp $Build_name $GITHUB_RUN_NUMBER 
 
-    - name: Create app version
-      run: |
-        jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
-  
-
- 
     - name: Extract JIRA IDs from local commit message
       id: jira
       shell: bash
@@ -212,5 +206,6 @@ jobs:
           --project $Project_Key --predicate ./jira-evidence-predicate.json --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown ./jira-evidence.md --provider-id jira --key ./jfrog-signing-key.pem
 
-
-
+    - name: Create app version
+      run: |
+        jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
