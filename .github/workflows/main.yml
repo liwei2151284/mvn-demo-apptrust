@@ -30,7 +30,7 @@ env:
 
 
 jobs:
-  security-java-demo:
+  apptrust-java-demo-build:
     name: Build
     runs-on: ubuntu-latest
 
@@ -206,6 +206,23 @@ jobs:
           --project $Project_Key --predicate ./jira-evidence-predicate.json --predicate-type "http://atlassian.com/jira/issues/v1" \
           --markdown ./jira-evidence.md --provider-id jira --key ./jfrog-signing-key.pem
 
+
+  apptrust-java-demo-create-apptrust-version:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: apptrust-java-demo-build
+
+    steps:
+
+    - name: Setup JFrog CLI
+      uses: jfrog/setup-jfrog-cli@v4.9.1
+      with:
+        oidc-provider-name: liwei2151284/mvn-demo-apptrust@github
+      env:
+        # JFrog Platform url
+        JF_URL: ${{ secrets.JF_URL }}
+
     - name: Create app version
       run: |
         jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
+
