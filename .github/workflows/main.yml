@@ -14,7 +14,7 @@ on:
       default: build
       options:
         - "1 - build without evidence"
-        - "2 - build with github evidence
+        - "2 - build with github evidence"
         - "3 - build with github jira evidence"
         - "4 - build with github jira evidence and no critical vulns"
 permissions:
