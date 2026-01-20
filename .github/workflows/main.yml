@@ -217,8 +217,7 @@ jobs:
 
 
     - name: Evidence on docker image
-      if: ${{ startsWith(inputs.mode, '3') ||startsWith(inputs.mode, '4')}}
-      if: ${{ steps.jira.outputs.jira_ids != '' }}
+      if: ${{ (startsWith(inputs.mode, '3') || startsWith(inputs.mode, '4')) && steps.jira.outputs.jira_ids != ''}}
       shell: bash
       run: |
         set -euo pipefail
