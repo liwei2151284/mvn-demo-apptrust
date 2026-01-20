@@ -7,16 +7,16 @@ on:
     #branches: [ "main" ]
   workflow_dispatch:
     inputs:
-    mode:
-      description: "Select run mode"
-      type: choice
-      required: true
-      default: build
-      options:
-        - "1 - build without evidence"
-        - "2 - build with github evidence"
-        - "3 - build with github jira evidence"
-        - "4 - build with github jira evidence and no critical vulns"
+      mode:
+        description: "Select run mode"
+        type: choice
+        required: true
+        default: build
+        options:
+          - "1 - build without evidence"
+          - "2 - build with github evidence"
+          - "3 - build with github jira evidence"
+          - "4 - build with github jira evidence and no critical vulns"
 permissions:
   actions: read
   contents: read
