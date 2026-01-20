@@ -97,7 +97,7 @@ jobs:
         jf -v
         jf rt ping
         sed -i "s/Version_Tag/$GITHUB_RUN_NUMBER/g" pom.xml
-        
+
         mvn -B -U clean install
 
         # Skip jf
@@ -230,7 +230,7 @@ jobs:
         oidc-provider-name: liwei2151284/mvn-demo-apptrust@github
       env:
         # JFrog Platform url
-        JF_URL: ${{ secrets.JF_URL }} 
+        JF_URL: ${{ secrets.JF_URL }}  
 
     - name: Create app version
       run: |
