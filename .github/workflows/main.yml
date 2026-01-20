@@ -225,9 +225,10 @@ jobs:
         oidc-provider-name: liwei2151284/mvn-demo-apptrust@github
       env:
         # JFrog Platform url
-        JF_URL: ${{ secrets.JF_URL }}
+        JF_URL: ${{ secrets.JF_URL }} 
 
     - name: Create app version
       run: |
         jf at version-create $Application_Key $GITHUB_RUN_NUMBER --source-type-builds "name=$Build_name, id=$GITHUB_RUN_NUMBER" 
 
+ 
