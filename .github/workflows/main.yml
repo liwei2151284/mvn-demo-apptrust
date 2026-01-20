@@ -1,14 +1,22 @@
 name: "mvn apptrust demo Build"
 
 on:
-  push:
-    branches: [ "main" ]
+  #push:
+  #  branches: [ "main" ]
   #pull_request:
     #branches: [ "main" ]
   workflow_dispatch:
-  schedule:
-    - cron: '42 11 * * 1'
-
+    inputs:
+    mode:
+      description: "Select run mode"
+      type: choice
+      required: true
+      default: build
+      options:
+        - "1 – build without evidence "
+        - "2 – build with github evidence
+        - "3 – build with github jira evidence"
+        - "4 – build with github jira evidence and no critical vulns"
 permissions:
   actions: read
   contents: read
@@ -85,6 +93,7 @@ jobs:
         #    jf config use demo
 
     - name: Fix fastjson vuln version
+      if: ${{ startsWith(inputs.mode, '4')}}
       run: |
         sed -i "s/1.2.31/1.2.83/g" pom.xml
         sed -i "s/2.12.1/2.16.0/g" pom.xml
@@ -120,6 +129,7 @@ jobs:
 
 
     - name: Attest Docker Image with Build Provenance
+      if: ${{ startsWith(inputs.mode, '2') ||startsWith(inputs.mode, '3') ||startsWith(inputs.mode, '4')}}
       uses: actions/attest-build-provenance@v3
       with:
         # The 'oci://' prefix is required by JFrog to correctly parse the artifact type
@@ -207,6 +217,7 @@ jobs:
 
 
     - name: Evidence on docker image
+      if: ${{ startsWith(inputs.mode, '3') ||startsWith(inputs.mode, '4')}}
       if: ${{ steps.jira.outputs.jira_ids != '' }}
       shell: bash
       run: |
