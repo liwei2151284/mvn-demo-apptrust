@@ -1,9 +1,4 @@
-FROM solenglatest.jfrog.io/weil-docker-demochina-remote/docker-framework:latest
-
-LABEL MAINTAINER="Alex Wang"
-
-RUN rm -rf /home/exec/tomcat/webapps/*
-
-ADD target/app-boot-*.war /home/exec/tomcat/webapps/ROOT.war
-
-CMD /bin/bash -c cd /home/exec; /home/exec/tomcat/bin/catalina.sh run
+FROM tomcat:jre17-temurin
+RUN rm -rf /usr/local/tomcat/webapps/*
+ADD target/app-boot-*.war /usr/local/tomcat/webapps/ROOT.war
+CMD ["catalina.sh","run"]
