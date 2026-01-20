@@ -189,20 +189,20 @@ jobs:
         - ${{ steps.jira.outputs.jira_ids }}
         EOF
 
-    - name: Create JIRA evidence (bind to build)
-      if: ${{ steps.jira.outputs.jira_ids != '' }}
-      shell: bash
-      run: |
-        set -euo pipefail
-        jf rt ping
-        jf evd create \
-          --build-name "${Build_name}" \
-          --build-number "${GITHUB_RUN_NUMBER}" \
-          --predicate jira-evidence-predicate.json \
-          --predicate-type "http://atlassian.com/jira/issues/v1" \
-          --markdown jira-evidence.md \
-          --provider-id jira \
-          --key ./jfrog-signing-key.pem
+    #- name: Create JIRA evidence (bind to build)
+    #  if: ${{ steps.jira.outputs.jira_ids != '' }}
+    #  shell: bash
+    #  run: |
+    #    set -euo pipefail
+    #    jf rt ping
+    #    jf evd create \
+    #      --build-name "${Build_name}" \
+    #      --build-number "${GITHUB_RUN_NUMBER}" \
+    #      --predicate jira-evidence-predicate.json \
+    #      --predicate-type "http://atlassian.com/jira/issues/v1" \
+    #      --markdown jira-evidence.md \
+    #      --provider-id jira \
+    #      --key ./jfrog-signing-key.pem
 
 
 
