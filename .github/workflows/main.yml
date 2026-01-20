@@ -87,6 +87,7 @@ jobs:
     - name: Fix fastjson vuln version
       run: |
         sed -i "s/1.2.31/1.2.83/g" pom.xml
+        sed -i "s/2.12.1/2.16.0/g" pom.xml
 
 
     - name: Build Maven Project
