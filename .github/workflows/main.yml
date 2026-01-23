@@ -225,7 +225,7 @@ jobs:
         echo "🔍 Creating evidence on docker image..."
         jf evd create --subject-repo-path $JFrog_Docker_Repo/$APP_NAME/$GITHUB_RUN_NUMBER/manifest.json  \
           --project $Project_Key --predicate ./jira-evidence-predicate.json --predicate-type "http://atlassian.com/jira/issues/v1" \
-          --markdown ./jira-evidence.md --provider-id jira --key ./jfrog-signing-key.pem
+          --markdown ./jira-evidence.md --provider-id jira  --key-alias $JFROG_CLI_KEY_ALIAS --key ./jfrog-signing-key.pem
 
 
   apptrust-java-demo-create-apptrust-version:
