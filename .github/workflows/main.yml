@@ -26,14 +26,14 @@ permissions:
 
 env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
-  JFrog_Docker_Repo: "weil-docker-local"
+  JFrog_Docker_Repo: "weiapp-docker-local"
   Build_name: "mvn-apptrust-demo-build"
-  Application_Key: "weil"
-  Project_Key: "weil"
+  Application_Key: "weiapp"
+  Project_Key: "weiapp"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
-  DOCKER_REGISTRY_PREFIX: "solenglatest.jfrog.io"
-  APP_NAME: "mvn-apptrust-demo"
+  DOCKER_REGISTRY_PREFIX: "demo.jfrogchina.com"
+  APP_NAME: "weil-apptrust"
 
 
 
@@ -77,7 +77,8 @@ jobs:
     - name: Setup JFrog CLI
       uses: jfrog/setup-jfrog-cli@v4.9.1
       with:
-        oidc-provider-name: liwei2151284/mvn-demo-apptrust@github
+        oidc-provider-name: wei-test
+        oidc-audience: github-jfrog
       env:
         # JFrog Platform url
         JF_URL: ${{ secrets.JF_URL }}
