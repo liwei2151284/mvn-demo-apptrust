@@ -28,12 +28,12 @@ env:
   JFrog_Mvn_Repo: "weil-mvn-virtual"
   JFrog_Docker_Repo: "weiapp-docker-local"
   Build_name: "mvn-apptrust-demo-build"
-  Application_Key: "weiapp"
+  Application_Key: "weilapp"
   Project_Key: "weiapp"
   JFROG_CLI_KEY_ALIAS: "weili-publickey"
   JFROG_CLI_SIGNING_KEY: ${{ secrets.JFROG_CLI_SIGNING_KEY }}
   DOCKER_REGISTRY_PREFIX: "demo.jfrogchina.com"
-  APP_NAME: "weil-apptrust"
+  APP_NAME: "weil-apptrust-demo"
 
 
 
